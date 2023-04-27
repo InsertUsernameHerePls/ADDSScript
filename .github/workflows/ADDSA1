@@ -1,0 +1,29 @@
+#Time Zone wijzigen van computer naar Romance Standard Time (UTC +01:00 Brussels, Copenhagen , Madrid, Paris)
+Set-TimeZone -Id "Romance Standard Time"
+
+#Hernoemen Netadapter
+Rename-NetAdapter -Name Ethernet0 -NewName E0
+
+#Set static Ip address (best practice) -> Indien deze all hetzelfde Ip en naam hebben krijg je een error ?
+Set-NetIPInterface -InterfaceAlias E0 -Dhcp Disabled
+Get-NetAdapter -Name E0| New-NetIPAddress -IPAddress 192.168.55.115 -DefaultGateway 192.168.55.1 -Prefixlength 24
+Set-DnsClientServerAddress -InterfaceIndex 6 -ServerAddresses 192.168.55.1
+
+#Installatie van DNS , DHCP en ADDS binnen 1 command line 
+Install-WindowsFeature -Name AD-Domain-Services, DNS, DHCP -IncludeManagementTools
+
+#Promote Server tot domain Controller
+Install-ADDSForest -CreateDnsDelegation:$false -databasepath "Windows\NTDS" -domainMode "Winthreshold" -Domainname "projectWilliam.local" -DomainNetbiosName "ProjectWilliam" -Forestmode "Winthreshold" -InstallDns:$true -logpath "c:Windows\NTDS" -NorebootOncompletion:$true -sysvolPath "c:\Windows\sysvol" -Force:$true -SafemodeAdministratorPassword (ConvertTo-SecureString "9097133LoL" -AsPlainText -Force)
+
+# nieuwe DHCP range instellen
+Add-dhcpServerv4Scope -Name "Scopeattempt1" -startRange "192.168.55.150" -Endrange "192.168.55.200" -Subnetmask "255.255.255.0" -LeaseDuration 8.00:00:00 
+
+#DHCP opties configureren 
+Set-DhcpServerv4OptionValue -Router 192.168.55.1 -DnsServer 192.168.55.115 -DnsDomain "projectWilliam.local"
+
+#Probleem met deze command line Set-DnsServerPrimaryZone is geen valid parameter ?
+Set-DnsServerPrimaryZone -Name "ProjectWilliam.local" -ReplicationScope "Forest" -DynamicUpdate "Secure"
+
+#Hernoemen Computernaam
+$env:COMPUTERNAME = "PWilliamPCA4"
+Rename-Computer -NewName $env:COMPUTERNAME -restart:$false
