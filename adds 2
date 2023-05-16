@@ -18,6 +18,9 @@ $disableieseconfig = 'yes' # IE ENCHANCED SECURITY UITSCHAKELEN MET YES EN INSHA
 # HOSTNAME/COMPUTERNAAM WIJZIGEN
 $computername = 'ADDSSERVER1' #NAAM VAN COMPUTER/SERVER
 
+#TIME ZONE WIJZIGEN VAN COMPUTER NAAR ROMANCE STANDARD TIME
+Set-TimeZone -Id "Romance Standard Time"
+
 # TIMESTAMP
     {
     $Global:timestamp = Get-Date -Format "dd-MM-yyy_hh:mm:ss"
