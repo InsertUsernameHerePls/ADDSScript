@@ -56,7 +56,7 @@ Catch {
 
 $firstcheck = Select-String -Path $logfile -Pattern "BASIC CONFIGURATION EFFECTUATED"
 
-IF {!$firstcheck) {
+IF (!$firstcheck) {
 #TIJD INGEVEN IN LOGFILE
 Write-Host "-= BASIC CONFIGURATION INSIGNIFICANT =-" -ForegroundColor DarkRed
 
@@ -102,10 +102,10 @@ IF ($enablerdp -ne "yes")
 #UITZETTEN IE ENHANCED SECURITY (NIET AAN TE RADEN , DEFAULT STAAT HET AAN) 
 timestamp
 try{
-    IF ($disableieconfig -eq "yes"
+    IF ($disableieconfig -eq "yes")
     {
-    Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{}' -name IsInstalled -Value 0 -ErrorAction Stop
-    Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{}' -name IsInstalled -Value 0 -ErrorAction Stop
+    Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}' -name IsInstalled -Value 0 -ErrorAction Stop
+    Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}' -name IsInstalled -Value 0 -ErrorAction Stop
     Write-Host "-= IE Enhanced Security TERMINATED =-" -ForegroundColor Green
     Add-Content $logfile "$($timestamp) - IE Enhanced TERMINATED"
     }
@@ -153,17 +153,12 @@ $secondcheck1 = Get-Content $logfile | Where-Object { $_.Contains("BASIC CONFIGU
 
 IF ($secondcheck1)
     {
-    $secondcheck2) = Get-Content $logfile | Where-Object { $_.Contains("STEP 2 CONFIG ACCEPTED") }
+    $secondcheck2 = Get-Content $logfile | Where-Object { $_.Contains("STEP 2 CONFIG ACCEPTED") }
 
     If (!secondcheck2)
+    {
 
-
-    # DEEL 2 VAN ADDS SCRIPTS (INSTALLEREN VAN ADDS ZELF)
-    
-    Timestamp
-
-    $dsrmpassword = Read-Host "Enter Directory Services Restore Password" -AsSecureString
-
+    # DEEL 2 VAN ADDS SCRIPTS (INSTALLEREN VAN ADDS ZELF)    
     Timestamp
     Try{
         Write-Host "-= REACHING THE ETHER FOR ADDS INSTALLMENT =-" -ForegroundColor Yellow
@@ -175,11 +170,12 @@ catch{
     write-warning -Message $("AD-DOMAIN ERROR ACKNOWLEDGED $($env:computername) . Error: "+ $_.Exception_Message)
     Break;
     }
+    
     #ACTIVE DIRECTORY CONFIGURATIE
 Timestamp
 Try {
     Write-Host "-= CONSTRUCTING AD-DOMAIN SERVICES =-" -ForegroundColor Yellow
-    Install-ADDSForest -DomainName $domainname -InstallDNS -ErrorAction stop -Norebootoncompletion -SafemodeAdministratorPassword (ConvertTo-SecureString "9097133LoL" -AsPlainText -Force) -Confirm:$false | Out-Null
+    Install-ADDSForest -CreateDnsDelegation:$false -databasepath "Windows\NTDS" -domainMode "Winthreshold" -Domainname "projectWilliam.local" -DomainNetbiosName "ProjectWilliam" -Forestmode "Winthreshold" -InstallDns:$true -logpath "c:Windows\NTDS" -NorebootOncompletion:$true -sysvolPath "c:\Windows\sysvol" -Force:$true -SafemodeAdministratorPassword (ConvertTo-SecureString "9097133LoL" -AsPlainText -Force)
     Write-host "-= AD-DOMAIN SERVICES DOWNLOAD SUCCESFULL=- " -ForegroundColor Green
     Add_content $logfile "$($timestamp) - AD-DOMAIN SERVICES DOWNLOAD SUCCESFULL=- "
     }
@@ -206,6 +202,7 @@ Catch{
     write-warning -Message $("REBOOT FAILURE $($env:computername) . Error"+ $_.Exception_Message)
     Break;
     }
+}
 }
 # NA REBOOT NAKIJKEN VAN ONZE PROGRESS VIA AANGEMAAKTE LOGFILE
 $thirdcheck1 = Get-Content $logfile | Where-Object { $_.Contains("AD-DOMAIN SERVICES CONFIGURATION REQUIREMENTS MET, INITIALISING REBOOT, INITIALISING SCRIPT 3 =-") }
