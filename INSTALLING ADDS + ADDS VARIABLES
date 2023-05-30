@@ -1,0 +1,61 @@
+﻿#Network Variables
+$ethipaddress = '192.168.55.5' #STATIC IP ADDRESS VAN DE SERVER
+$ethprefixlength = '24' # AANGEGEVEN CIDR NOTATIE SUBNETMASK '255.255.255.0' (16/255.255.0.0 classe B) (8/255.0.0.0 classe A)
+$etherdefaultgw = '192.168.55.1' #DEFAULT GATEWAY ROUTER IP ADDRESS
+$ethdns = '192.168.55.5'#OMDAT DIT ONZE DNS SERVER WORDT GEVEN WE DE STATIC IP ADDRESS VAN ONZE SERVER HIER IN
+$subnetlocation = 'Belgium'
+$sitename = 'ProjectWilliam.local'
+
+#ACTIVE DIRECTORY DOMAIN
+$domainname = 'ProjectWilliam.local'
+
+#REMOTE DESKTOP ENABLE/DISABLE
+$enablerdp = 'yes' # ENABLE IS YES / DISABLE IS NO
+
+#IE ENCHANCED SECURITY 
+$disableieseconfig = 'yes' # IE ENCHANCED SECURITY UITSCHAKELEN MET YES EN INSHAKELEN MET NO
+
+# HOSTNAME/COMPUTERNAAM WIJZIGEN
+$computername = 'ADDSSERVER1' #NAAM VAN COMPUTER/SERVER
+
+Try{
+        Write-Host "-= REACHING THE ETHER FOR ADDS INSTALLMENT =-" -ForegroundColor Yellow
+        Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools
+        Write-Host "-= AD-DOMAIN SERVICES BREACHED SUCCES =-" -ForegroundColor Green
+        }
+
+catch{
+    write-warning -Message $("AD-DOMAIN ERROR ACKNOWLEDGED $($env:computername) . Error: "+ $_.Exception_Message)
+    Break;
+    }
+
+    #ACTIVE DIRECTORY CONFIGURATIE
+
+$Timestamp
+Try {
+    Write-Host "-= CONSTRUCTING AD-DOMAIN SERVICES =-" -ForegroundColor Yellow
+    Install-ADDSForest -createDnsDelegation:$False -databasepath "Windows\NTDS" -domainmode "Winthreshold" -Domainname "projectWilliam.local" -DomainNetbiosName "ProjectWilliam" -forestmode "Winthreshold" -InstallDns:$true -logpath "C:Windows\NTDS" -NorebootOncompletion:$true -safemodeAdministratorPassword (ConvertTo-SecureString "9097133LoL" -AsPlainText -force)
+    Write-host "-= AD-DOMAIN SERVICES DOWNLOAD SUCCESFULL=- " -ForegroundColor Green
+    }
+Catch {
+    Write-Warning -Message $("FAILURE CONSTRUCTION AD-DOMAIN SERVICES. Error: "+ $_.Exception_Message)
+    Break;
+    }
+
+#TWEEDE LOGFILE SCRIPT COMPLETION 
+#REBOOT COMPUTER VIA LOGFILE
+$timestamp
+Write-Host "-= REBOOT INITIALISING WITHIN 20 SECONDS =-" -ForegroundColor White -BackgroundColor Black
+Sleep 20
+
+try{
+    Restart-Computer -ComputerName $env:COMPUTERNAME -ErrorAction stop
+    Write-Host "-= REBOOT COMMENCING =-" -foregroundColor Green
+    Break;
+    }
+Catch{
+    write-warning -Message $("REBOOT FAILURE $($env:computername) . Error"+ $_.Exception_Message)
+    Break;
+    }
+}
+}
