@@ -1,0 +1,33 @@
+#Network Variables
+$ethipaddress = '192.168.55.5' #STATIC IP ADDRESS VAN DE SERVER
+$ethprefixlength = '24' # AANGEGEVEN CIDR NOTATIE SUBNETMASK '255.255.255.0' (16/255.255.0.0 classe B) (8/255.0.0.0 classe A)
+$etherdefaultgw = '192.168.55.1' #DEFAULT GATEWAY ROUTER IP ADDRESS
+$ethdns = '192.168.55.5'#OMDAT DIT ONZE DNS SERVER WORDT GEVEN WE DE STATIC IP ADDRESS VAN ONZE SERVER HIER IN
+$subnetlocation = 'Belgium'
+$sitename = 'ProjectWilliam.local'
+
+#ACTIVE DIRECTORY DOMAIN
+$domainname = 'ProjectWilliam.local'
+
+#REMOTE DESKTOP ENABLE/DISABLE
+$enablerdp = 'yes' # ENABLE IS YES / DISABLE IS NO
+
+#IE ENHANCED SECURITY 
+$disableieseconfig = 'yes' # IE ENCHANCED SECURITY UITSCHAKELEN MET YES EN INSHAKELEN MET NO
+
+# HOSTNAME/COMPUTERNAAM WIJZIGEN
+$computername = 'ADDSSERVER1' #NAAM VAN COMPUTER/SERVER
+
+Install-WindowsFeature DHCP -IncludeManagementTools
+netsh dhcp add securitygroups
+Restart-Service dhcpserver
+
+Add-DhcpServerInDC -DnsName $domainname -IPAddress $ethipaddress
+#verifier that the dhcp serer is geauthorizeerd in AD
+Get-DhcpServerInDC
+
+rem Configure scope Corpnet
+Add-DhcpServerv4Scope -name "WilliamProject" -StartRange 192.168.55.51 -EndRange 192.168.55.254 -SubnetMask 255.255.255.0 -State Active
+Add-DhcpServerv4ExclusionRange -ScopeID 192.168.55.0 -StartRange 192.168.55.1 -EndRange 192.168.55.50
+Set-DhcpServerv4OptionValue -OptionID 3 -Value 192.168.55.1 -ScopeID 192.168.55.0 -ComputerName $computername
+Set-DhcpServerv4OptionValue -DnsDomain $domainname -DnsServer $ethdns
