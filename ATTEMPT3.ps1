@@ -1,24 +1,24 @@
 ﻿
 # Network Variables
-$ethipaddress = '192.168.55.5' # static IP Address of the server
-$ethprefixlength = '24' # subnet mask - 24 = 255.255.255.0
-$ethdefaultgw = '192.168.55.1' # default gateway
-$ethdns = '192.168.55.5' # for multiple DNS you can append DNS entries with comma's
-$globalsubnet = '192.168.55.5/24' # Global Subnet will be used in DNS Reverse Record and AD Sites and Services Subnet
+$ethipaddress = '192.168.55.3' #STATIC IP ADDRESS VAN DE SERVER
+$ethprefixlength = '24' # AANGEGEVEN CIDR NOTATIE SUBNETMASK '255.255.255.0' (16/255.255.0.0 classe B) (8/255.0.0.0 classe A)
+$ethdefaultgw = '192.168.55.1' #DEFAULT GATEWAY ROUTER IP ADDRESS
+$ethdns = '192.168.55.5' #OMDAT DIT ONZE DNS SERVER WORDT GEVEN WE DE STATIC IP ADDRESS VAN ONZE SERVER HIER IN
+$globalsubnet = '192.168.55.5/24' # GLOBAL SUBNET WORDT GEBRUIKT VOOR DNS REVERSE RECORD EN AD SITES EN SERVICE SUBNETS
 $subnetlocation = 'Belgium'
-$sitename = 'ProjectWilliam.local' # Renames Default-First-Site within AD Sites and Services
+$sitename = 'ProjectWilliam.local'
 
-# Active Directory Variables
-$domainname = 'ProjectWilliam.local' # enter in your active directory domain
+#ACTIVE DIRECTORY DOMAIN
+$domainname = 'ProjectWilliam.local' 
 
-# Remote Desktop Variable
-$enablerdp = 'yes' # to enable RDP, set this variable to yes. to disable RDP, set this variable to no
+#REMOTE DESKTOP ENABLE/DISABLE
+$enablerdp = 'yes' # ENABLE IS YES / DISABLE IS NO
 
-# Disable IE Enhanced Security Configuration Variable
-$disableiesecconfig = 'yes' # to disable IE Enhanced Security Configuration, set this variable to yes. to leave enabled, set this variable to no
+#IE ENCHANCED SECURITY 
+$disableiesecconfig = 'yes' # IE ENCHANCED SECURITY UITSCHAKELEN MET YES EN INSHAKELEN MET NO AANGERADEN! 
 
-# Hostname Variables
-$computername = 'SERVERATT6' # enter in your server name
+# HOSTNAME/COMPUTERNAAM WIJZIGEN
+$computername = 'SERVERATT7' #NAAM VAN COMPUTER/SERVER
 
 # NTP Variables
 $ntpserver1 = '0.be.pool.ntp.org'
@@ -27,16 +27,16 @@ $ntpserver2 = '1.be.pool.ntp.org'
 # DNS Variables
 $reversezone = 'ProjectWilliam.local'
 
-# Timestamp
+# HET MOGELIJK TE MAKEN VAN TIMESTAMP FUNCTIE OM TIJD BIJ TE HOUDEN VIA LOGFILE
 Function Timestamp
     {
     $Global:timestamp = Get-Date -Format "dd-MM-yyy_hh:mm:ss"
     }
 
-# Log File Location
+#AANMAKEN VAN LOGFILE LOCATIE
 $logfile = "C:\ADDS_LOG\ADDS_LOG.txt"
 
-# Create Log File
+#AANMAKEN VAN LOGFILE ZELF DIE WE GAAN GEBRUIKEN ALS CHECKMARK OM COMPUTER IN 3 STAPPEN TE LATEN HERSTARTEN
 Write-Host "-= Get timestamp =-" -ForegroundColor Green
 
 Timestamp
@@ -60,26 +60,20 @@ Catch{
      Break;
      }
 }
-
-# Check Script Progress via Logfile
+#CHECKSUMS VAN SCRIPT VIA LOGFILE DIE NET IS AANGEMAAKT zie C:\ADDS_LOG\ADDS_LOG.txt
 
 $firstcheck = Select-String -Path $logfile -Pattern "1-Basic-Server-Config-Complete"
 
 IF (!$firstcheck) {
 
-# Add starting date and time
+# TIJD INGEVEN IN LOGFILE
 Write-Host "-= 1-Basic-Server-Config-Complete, does not exist =-" -ForegroundColor Yellow
 
 Timestamp
 Add-Content $logfile "$($Timestamp) - Starting Active Directory Script"
 
-## 1-Basic-Server-Config ##
-
-#------------
-#- Settings -
-#------------
-
-# Set Network
+## BASIC NETWORK CONFIGURATIE
+# NETWORK AANMAKEN
 Timestamp
 Try{
     New-NetIPAddress -IPAddress $ethipaddress -PrefixLength $ethprefixlength -DefaultGateway $ethdefaultgw -InterfaceIndex (Get-NetAdapter).InterfaceIndex -ErrorAction Stop | Out-Null
@@ -92,7 +86,7 @@ Catch{
      Break;
      }
 
-# Set RDP
+# REMOTE DESKTOP UITSCHAKLEN OF INSCHAKELEN 
 Timestamp
 Try{
     IF ($enablerdp -eq "yes")
@@ -114,7 +108,7 @@ IF ($enablerdp -ne "yes")
     Add-Content $logfile "$($Timestamp) - RDP remains disabled"
     }
 
-# Disable IE Enhanced Security Configuration
+# INSCHAKELEN OF UITSCHAKELEN IE ENHANCEDSECURTIY
 Timestamp 
 Try{
     IF ($disableiesecconfig -eq "yes")
@@ -136,7 +130,7 @@ If ($disableiesecconfig -ne "yes")
     Add-Content $logfile "$($Timestamp) - IE Enhanced Security Configuration remains enabled"
     }
 
-# Set Hostname
+# HOSTNAME DOORGEVEN AAN SERVER
 Timestamp
 Try{
     Rename-Computer -ComputerName $env:computername -NewName $computername -ErrorAction Stop | Out-Null
@@ -148,11 +142,11 @@ Catch{
      Break;
      }
 
-# Add first script complete to logfile
+# DOORGEVEN AAN LOGFILE DAT DEEL 1 VAN SCRIPT GEDAAN IS
 Timestamp
 Add-Content $logfile "$($Timestamp) - 1-Basic-Server-Config-Complete, starting script 2 =-"
 
-# Reboot Computer to apply settings
+# REBOOTEN VAN PC OM AANGEMAAKTE SETTINGS 
 Timestamp
 Write-Host "-= Save all your work, computer rebooting in 30 seconds =-"  -ForegroundColor White -BackgroundColor Red
 Sleep 30
@@ -170,7 +164,7 @@ Catch{
 
 } # Close 'IF (!$firstcheck)'
 
-# Check Script Progress via Logfile
+# NA HET RESTARTEN ZAL SCRIPT NAKIJKEN IN LOGFILE WAAR WE STAAN EN DAN BEGINNEN AAN DEEL 2
 $secondcheck1 = Get-Content $logfile | Where-Object { $_.Contains("1-Basic-Server-Config-Complete") }
 
 IF ($secondcheck1)
@@ -180,7 +174,7 @@ IF ($secondcheck1)
     IF (!$secondcheck2)
         {
 
-        ## 2-Build-Active-Directory ##
+        ## DOWNLOADEN EN AANMAKEN VAN AD ##
 
         Timestamp
         
@@ -188,14 +182,14 @@ IF ($secondcheck1)
         #- Variables -                                         -
         #-------------
 
-        # Active Directory Variables
+        # AANGEVEN VAN PASSWOORD DIE U WILT ALS ADMIN VAN DEZE ADDS ( POP UP KOMT BIJ HET BEGINNEN VAN DEEL 2 DIE PASSWOORD ZAL AANVRAGEN )
         $dsrmpassword = Read-Host "Enter Directory Services Restore Password" -AsSecureString
 
         #------------
         #- Settings -
         #------------
 
-        # Install Active Directory Services
+        # HET INSTALLEREN VAN DE AD ZELF
         Timestamp
         Try{
             Write-Host "-= Active Directory Domain Services installing =-" -ForegroundColor Yellow
@@ -208,7 +202,7 @@ IF ($secondcheck1)
             Break;
             }
 
-        # Configure Active Directory
+        # CONFIGURATIE VAN DE ADDS
         Timestamp
         Try{
             Write-Host "-= Configuring Active Directory Domain Services =-" -ForegroundColor Yellow
@@ -221,11 +215,11 @@ IF ($secondcheck1)
             Break;
             }
 
-        # Add second script complete to logfile
+        # TWEEDE COMPLETION DOORGEVEN AAN HET LOGFILE
         Timestamp
         Add-Content $logfile "$($Timestamp) - 2-Build-Active-Directory-Complete, starting script 3 =-"
 
-        # Reboot Computer to apply settings
+        # PC RESTART VOOR ADDS
         Write-Host "-= Save all your work, computer rebooting in 30 seconds =-" -ForegroundColor White -BackgroundColor Red
         Sleep 30
 
@@ -243,18 +237,18 @@ IF ($secondcheck1)
     }# Close 'IF ($secondcheck1)'
 
 
-# Add second script complete to logfile
 
-# Check Script Progress via Logfile
+
+# TWEEDE KEER NAKIJKEN VAN LOGFILE OM PROGRESS NA TE ZIEN
 $thirdcheck = Get-Content $logfile | Where-Object { $_.Contains("2-Build-Active-Directory-Complete") }
 
-## 3-Build-Active-Directory ##
+## DNS SETTINGS AANPASSEN OP ADDS##
 
 #------------
 #- Settings -
 #------------
 
-# Add DNS Reverse Record
+# TOEVOEGEN VAN EEN DNS REVERSE LOOKUP
 Timestamp
 Try{
     Add-DnsServerPrimaryZone -NetworkId $globalsubnet -DynamicUpdate Secure -ReplicationScope Domain -ErrorAction Stop
@@ -266,7 +260,7 @@ Catch{
      Break;
      }
 
-# Add DNS Scavenging
+# ADNS SCAVENGING MOGELIJKHEID TOEVOEGEN
 Write-Host "-= Set DNS Scavenging =-" -ForegroundColor Yellow
 
 Timestamp
@@ -285,7 +279,7 @@ Get-DnsServerScavenging
 
 Write-Host "-= DNS Scavenging Complete =-" -ForegroundColor Green
 
-# Create Active Directory Sites and Services
+# AD SITES EN SERVICES AANMAKEN
 Timestamp
 Try{
     New-ADReplicationSubnet -Name $globalsubnet -Site "Default-First-Site-Name" -Location $subnetlocation -ErrorAction Stop
@@ -297,7 +291,7 @@ Catch{
      Break;
      }
 
-# Rename Active Directory Site
+# HERNOEMEN VAN DNS SITES
 Timestamp
 Try{
     Get-ADReplicationSite Default-First-Site-Name | Rename-ADObject -NewName $sitename -ErrorAction Stop
@@ -309,7 +303,7 @@ Catch{
      Break;
      }
 
-# Add NTP settings to PDC
+# NTP SETTINGS TOEVOEGEN 
 
 Timestamp
 
@@ -331,7 +325,7 @@ IF ($serverpdc)
      }
     }
 
-# Script Finished
+# DOORGEVEN AAN LOGFILE DAT HET SCRIPT COMPLEET IS
 
 Timestamp
 Write-Host "-= 3-Finalize-AD-Config Complete =-" -ForegroundColor Green
