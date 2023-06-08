@@ -33,23 +33,23 @@ Function Timestamp
 $logfile = "C:\ADDS_LOG\ADDS_LOG.txt"
 
 #AANMAKEN VAN LOGFILE ZELF DIE WE GAAN GEBRUIKEN ALS CHECKMARK OM COMPUTER IN 3 STAPPEN TE LATEN HERSTARTEN
-Write-Host "-= Get timestamp =-" -ForegroundColor Green
+Write-Host "-=<<< RETRIEVING TIMESTAMP >>>=-" -ForegroundColor Green
 
 Timestamp
 
 IF (Test-Path $logfile)
     {
-    Write-Host "-= Logfile Exists =-" -ForegroundColor Yellow
+    Write-Host "-=<<< LOGFILE ENDURES >>>=-" -ForegroundColor Yellow
     }
 
 ELSE {
 
-Write-Host "-= Creating Logfile =-" -ForegroundColor Green
+Write-Host "-=<<< COGITATING LOGFILE >>>=-" -ForegroundColor Green
 
 Try{
    New-Item -Path 'C:\ADDS_LOG' -ItemType Directory
    New-Item -ItemType File -Path $logfile -ErrorAction Stop | Out-Null
-   Write-Host "-= The file $($logfile) has been created =-" -ForegroundColor Green
+   Write-Host "-=<<< LOG $($logfile) HAS BEEN COGITATED >>>=-" -ForegroundColor Green
    }
 Catch{
      Write-Warning -Message $("FAILURE CREATION LOGFILE. Error: "+ $_.Exception.Message)
