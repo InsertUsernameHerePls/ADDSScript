@@ -20,10 +20,6 @@ $disableiesecconfig = 'no' # IE ENCHANCED SECURITY UITSCHAKELEN MET YES EN INSHA
 # HOSTNAME/COMPUTERNAAM WIJZIGEN
 $computername = 'ADDSSERVERWILLIAM' #NAAM VAN COMPUTER/SERVER
 
-# NTP Variables
-$ntpserver1 = '0.be.pool.ntp.org'
-$ntpserver2 = '1.be.pool.ntp.org'
-
 # DNS Variables
 $reversezone = 'ProjectWilliam.local'
 
