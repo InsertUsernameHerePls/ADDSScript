@@ -1,5 +1,5 @@
-﻿
-# Network Variables
+### ADDS SCRIPT VOOR AD , DNS , DHCP ###
+# NETWERK VARIABLES
 $ethipaddress = '192.168.55.3' #STATIC IP ADDRESS VAN DE SERVER
 $ethprefixlength = '24' # AANGEGEVEN CIDR NOTATIE SUBNETMASK '255.255.255.0' (16/255.255.0.0 classe B) (8/255.0.0.0 classe A)
 $ethdefaultgw = '192.168.55.1' #DEFAULT GATEWAY ROUTER IP ADDRESS
@@ -15,10 +15,10 @@ $domainname = 'ProjectWilliam.local'
 $enablerdp = 'yes' # ENABLE IS YES / DISABLE IS NO
 
 #IE ENCHANCED SECURITY 
-$disableiesecconfig = 'yes' # IE ENCHANCED SECURITY UITSCHAKELEN MET YES EN INSHAKELEN MET NO AANGERADEN! 
+$disableiesecconfig = 'no' # IE ENCHANCED SECURITY UITSCHAKELEN MET YES EN INSHAKELEN MET NO AANGERADEN! 
 
 # HOSTNAME/COMPUTERNAAM WIJZIGEN
-$computername = 'SERVERATT7' #NAAM VAN COMPUTER/SERVER
+$computername = 'ADDSSERVERWILLIAM' #NAAM VAN COMPUTER/SERVER
 
 # NTP Variables
 $ntpserver1 = '0.be.pool.ntp.org'
@@ -56,7 +56,7 @@ Try{
    Write-Host "-= The file $($logfile) has been created =-" -ForegroundColor Green
    }
 Catch{
-     Write-Warning -Message $("Could not create logfile. Error: "+ $_.Exception.Message)
+     Write-Warning -Message $("FAILURE CREATION LOGFILE. Error: "+ $_.Exception.Message)
      Break;
      }
 }
@@ -82,7 +82,7 @@ Try{
     Add-Content $logfile "$($Timestamp) - IP Address successfully set to $($ethipaddress), subnet $($ethprefixlength), default gateway $($ethdefaultgw) and DNS Server $($ethdns)"
    }
 Catch{
-     Write-Warning -Message $("Failed to apply network settings. Error: "+ $_.Exception.Message)
+     Write-Warning -Message $("FAILURE APPLICATION NETWORK SETTINGS. Error: "+ $_.Exception.Message)
      Break;
      }
 
@@ -134,17 +134,17 @@ If ($disableiesecconfig -ne "yes")
 Timestamp
 Try{
     Rename-Computer -ComputerName $env:computername -NewName $computername -ErrorAction Stop | Out-Null
-    Write-Host "-= Computer name set to $($computername) =-" -ForegroundColor Green
-    Add-Content $logfile "$($Timestamp) - Computer name set to $($computername)"
+    Write-Host "-=< ENTITY SET TO $($computername) >=-" -ForegroundColor Green
+    Add-Content $logfile "$($Timestamp) - ENTITY SET TO $($computername)"
     }
 Catch{
-     Write-Warning -Message $("Failed to set new computer name. Error: "+ $_.Exception.Message)
+     Write-Warning -Message $("FAILURE ASSIGNING ENTITY IDENTITY . Error: "+ $_.Exception.Message)
      Break;
      }
 
 # DOORGEVEN AAN LOGFILE DAT DEEL 1 VAN SCRIPT GEDAAN IS
 Timestamp
-Add-Content $logfile "$($Timestamp) - 1-Basic-Server-Config-Complete, starting script 2 =-"
+Add-Content $logfile "$($Timestamp) - CONFIGURATION STEP 1 COMPLETED , INITIALISING STEP 2 =-" 
 
 # REBOOTEN VAN PC OM AANGEMAAKTE SETTINGS 
 Timestamp
@@ -165,11 +165,11 @@ Catch{
 } # Close 'IF (!$firstcheck)'
 
 # NA HET RESTARTEN ZAL SCRIPT NAKIJKEN IN LOGFILE WAAR WE STAAN EN DAN BEGINNEN AAN DEEL 2
-$secondcheck1 = Get-Content $logfile | Where-Object { $_.Contains("1-Basic-Server-Config-Complete") }
+$secondcheck1 = Get-Content $logfile | Where-Object { $_.Contains("CONFIGURATION STEP 1 COMPLETED") }
 
 IF ($secondcheck1)
     {
-    $secondcheck2 = Get-Content $logfile | Where-Object { $_.Contains("2-Build-Active-Directory-Complete") }
+    $secondcheck2 = Get-Content $logfile | Where-Object { $_.Contains("2-CONFIGURATION STEP 2 COMPLETED") }
 
     IF (!$secondcheck2)
         {
@@ -205,32 +205,32 @@ IF ($secondcheck1)
         # CONFIGURATIE VAN DE ADDS
         Timestamp
         Try{
-            Write-Host "-= Configuring Active Directory Domain Services =-" -ForegroundColor Yellow
+            Write-Host "-=<<< COGITATING ACTIVE DIRECTORY DOMAIN SERVICES >>>=-" -ForegroundColor Yellow
             Install-ADDSForest -DomainName $domainname -InstallDNS -ErrorAction Stop -NoRebootOnCompletion -SafeModeAdministratorPassword $dsrmpassword -Confirm:$false | Out-Null
-            Write-Host "-= Active Directory Domain Services configured successfully =-" -ForegroundColor Green
-            Add-Content $logfile "$($Timestamp) - Active Directory Domain Services configured successfully"
+            Write-Host "-=<<< COGITATION ACTIVE DIRECTORY DOMAIN SERVICES ACCEPTED >>>=-" -ForegroundColor Green
+            Add-Content $logfile "$($Timestamp) - COGITATION ACTIVE DIRECTORY DOMAIN SERVICES ACCEPTED"
             }
         Catch{
-            Write-Warning -Message $("Failed to configure Active Directory Domain Services. Error: "+ $_.Exception.Message)
+            Write-Warning -Message $("FAILURE COGITATING ACTIVE DIRECTORY DOMAIN SERVICES. Error: "+ $_.Exception.Message)
             Break;
             }
 
         # TWEEDE COMPLETION DOORGEVEN AAN HET LOGFILE
         Timestamp
-        Add-Content $logfile "$($Timestamp) - 2-Build-Active-Directory-Complete, starting script 3 =-"
+        Add-Content $logfile "$($Timestamp) - 2-CONFIGURATION STEP 2 COMPLETED, INITIALISING STEP 3 =-"
 
         # PC RESTART VOOR ADDS
-        Write-Host "-= Save all your work, computer rebooting in 30 seconds =-" -ForegroundColor White -BackgroundColor Red
-        Sleep 30
+        Write-Host "-=<<< INITIATING RESTART >>>=-" -ForegroundColor White -BackgroundColor Red
+        Sleep 10
 
         Try{
             Restart-Computer -ComputerName $env:computername -ErrorAction Stop
-            Write-Host "Rebooting Now!!" -ForegroundColor Green
-            Add-Content $logfile "$($Timestamp) - Rebooting Now!!"
+            Write-Host "REBOOT INITIALIZED" -ForegroundColor Green
+            Add-Content $logfile "$($Timestamp) - REBOOT INITIALIZED"
             Break;
             }
         Catch{
-            Write-Warning -Message $("Failed to restart computer $($env:computername). Error: "+ $_.Exception.Message)
+            Write-Warning -Message $("FAILURE REBOOT $($env:computername). Error: "+ $_.Exception.Message)
             Break;
             }
         } # Close 'IF ($secondcheck2)'
@@ -240,7 +240,7 @@ IF ($secondcheck1)
 
 
 # TWEEDE KEER NAKIJKEN VAN LOGFILE OM PROGRESS NA TE ZIEN
-$thirdcheck = Get-Content $logfile | Where-Object { $_.Contains("2-Build-Active-Directory-Complete") }
+$thirdcheck = Get-Content $logfile | Where-Object { $_.Contains("2-CONFIGURATION STEP 2 COMPLETED") }
 
 ## DNS SETTINGS AANPASSEN OP ADDS##
 
@@ -252,42 +252,42 @@ $thirdcheck = Get-Content $logfile | Where-Object { $_.Contains("2-Build-Active-
 Timestamp
 Try{
     Add-DnsServerPrimaryZone -NetworkId $globalsubnet -DynamicUpdate Secure -ReplicationScope Domain -ErrorAction Stop
-    Write-Host "-= Successfully added in $($globalsubnet) as a reverse lookup within DNS =-" -ForegroundColor Green
-    Add-Content $logfile "$($Timestamp) - Successfully added $($globalsubnet) as a reverse lookup within DNS"
+    Write-Host "-=<<< SUCCEEDED $($globalsubnet) AS RERVERSE LOOKUP WITHIN DNS >>>=-" -ForegroundColor Green
+    Add-Content $logfile "$($Timestamp) - SUCCEEDED $($globalsubnet) AS REVERSE LOOKUP WITHIN DNS"
     }
 Catch{
-     Write-Warning -Message $("Failed to create reverse DNS lookups zone for network $($globalsubnet). Error: "+ $_.Exception.Message)
+     Write-Warning -Message $("FAILURE CREATING REVERSE LOOKUP $($globalsubnet). Error: "+ $_.Exception.Message)
      Break;
      }
 
 # ADNS SCAVENGING MOGELIJKHEID TOEVOEGEN
-Write-Host "-= Set DNS Scavenging =-" -ForegroundColor Yellow
+Write-Host "-=<<< COGITATING DNS SCAVENING >>>=-" -ForegroundColor Yellow
 
 Timestamp
 Try{
-    Set-DnsServerScavenging -ScavengingState $true -ScavengingInterval 7.00:00:00 -Verbose -ErrorAction Stop
-    Set-DnsServerZoneAging $domainname -Aging $true -RefreshInterval 7.00:00:00 -NoRefreshInterval 7.00:00:00 -Verbose -ErrorAction Stop
-    Set-DnsServerZoneAging $reversezone -Aging $true -RefreshInterval 7.00:00:00 -NoRefreshInterval 7.00:00:00 -Verbose -ErrorAction Stop
+    Set-DnsServerScavenging -ScavengingState $true -ScavengingInterval 8.00:00:00 -Verbose -ErrorAction Stop
+    Set-DnsServerZoneAging $domainname -Aging $true -RefreshInterval 8.00:00:00 -NoRefreshInterval 8.00:00:00 -Verbose -ErrorAction Stop
+    Set-DnsServerZoneAging $reversezone -Aging $true -RefreshInterval 8.00:00:00 -NoRefreshInterval 8.00:00:00 -Verbose -ErrorAction Stop
     Add-Content $logfile "$($Timestamp) - DNS Scavenging Complete"
     }
 Catch{
-     Write-Warning -Message $("Failed to DNS Scavenging. Error: "+ $_.Exception.Message)
+     Write-Warning -Message $("FAILURE COGIATING DNS SCAVENGING. Error: "+ $_.Exception.Message)
      Break;
      }
 
 Get-DnsServerScavenging
 
-Write-Host "-= DNS Scavenging Complete =-" -ForegroundColor Green
+Write-Host "-=<<< DNS SCAVENGING COTIGATED >>>=-" -ForegroundColor Green
 
 # AD SITES EN SERVICES AANMAKEN
 Timestamp
 Try{
     New-ADReplicationSubnet -Name $globalsubnet -Site "Default-First-Site-Name" -Location $subnetlocation -ErrorAction Stop
-    Write-Host "-= Successfully added Subnet $($globalsubnet) with location $($subnetlocation) in AD Sites and Services =-" -ForegroundColor Green
-    Add-Content $logfile "$($Timestamp) - Successfully added Subnet $($globalsubnet) with location $($subnetlocation) in AD Sites and Services"
+    Write-Host "-=<<< SUCCEEDED ADDING $($globalsubnet) WITHIN LOCATION $($subnetlocation) IN AD SITES AND SERVICES >>>=-" -ForegroundColor Green
+    Add-Content $logfile "$($Timestamp) - SUCCEEDED ADDING $($globalsubnet) WITHIN LOCATION $($subnetlocation) IN AD SITES AND SERVICES"
     }
 Catch{
-     Write-Warning -Message $("Failed to create Subnet $($globalsubnet) in AD Sites and Services. Error: "+ $_.Exception.Message)
+     Write-Warning -Message $("FAILURE CREATION SUBNET $($globalsubnet) IN AD SITES AND SERVICES. Error: "+ $_.Exception.Message)
      Break;
      }
 
@@ -295,35 +295,14 @@ Catch{
 Timestamp
 Try{
     Get-ADReplicationSite Default-First-Site-Name | Rename-ADObject -NewName $sitename -ErrorAction Stop
-    Write-Host "-= Successfully renamed Default-First-Site-Nameto $sitename in AD Sites and Services =-" -ForegroundColor Green
-    Add-Content $logfile "$($Timestamp) - Successfully renamed Default-First-Site-Nameto $sitename in AD Sites and Services"
+    Write-Host "-=<<< SUCCEEDED RENAME $sitename IN AD SITES AND SERVICES >>>=-" -ForegroundColor Green
+    Add-Content $logfile "$($Timestamp) - SUCCEEDED RENAME $sitename IN AD SITES AND SERVICES"
     }
 Catch{
-     Write-Warning -Message $("Failed to rename site in AD Sites and Services. Error: "+ $_.Exception.Message)
+     Write-Warning -Message $("FAILURE RENAME $sitename IN AD SITES AND SERVICES. Error: "+ $_.Exception.Message)
      Break;
      }
-
-# NTP SETTINGS TOEVOEGEN 
-
-Timestamp
-
-$serverpdc = Get-AdDomainController -Filter * | Where {$_.OperationMasterRoles -contains "PDCEmulator"}
-
-IF ($serverpdc)
-    {
-    Try{
-        Start-Process -FilePath "C:\Windows\System32\w32tm.exe" -ArgumentList "/config /manualpeerlist:$($ntpserver1),$($ntpserver2) /syncfromflags:MANUAL /reliable:yes /update" -ErrorAction Stop
-        Stop-Service w32time -ErrorAction Stop
-        sleep 2
-        Start-Service w32time -ErrorAction Stop
-        Write-Host "-= Successfully set NTP Servers: $($ntpserver1) and $($ntpserver2) =-" -ForegroundColor Green
-        Add-Content $logfile "$($Timestamp) - Successfully set NTP Servers: $($ntpserver1) and $($ntpserver2)"
-        }
-    Catch{
-          Write-Warning -Message $("Failed to set NTP Servers. Error: "+ $_.Exception.Message)
-     Break;
-     }
-    }
+}
 
 # DOORGEVEN AAN LOGFILE DAT HET SCRIPT COMPLEET IS
 
